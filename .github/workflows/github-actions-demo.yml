@@ -1,0 +1,38 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches: [ "main", "develop" ] # Ejecutar en push a estas ramas
+  pull_request:
+    branches: [ "main", "develop" ] # Ejecutar en cada Pull Request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Elige un sistema operativo para ejecutar el job
+
+    steps:
+    - uses: actions/checkout@v4 # Paso 1: Descarga tu código
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2' # O la versión de PHP que uses (ej. 8.1, 8.3)
+        extensions: mbstring, pdo_mysql, zip, gd # Extensiones necesarias
+        coverage: none # Puedes usar 'xdebug' o 'pcov' si quieres generar cobertura de código
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Run PHPUnit tests
+      run: ./vendor/bin/phpunit # Ejecuta tus tests PHPUnit
