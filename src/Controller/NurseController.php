@@ -91,7 +91,7 @@ final class NurseController extends AbstractController
             return $this->json(['message' => 'Login successful'], 200);
         }
 
-        return $this->json(['error' => 'Invalid credentials'], 400);
+        return $this->json(['error' => 'Invalid credentials'], 401);
     }
 
 
